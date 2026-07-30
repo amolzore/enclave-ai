@@ -1,0 +1,28 @@
+# Local Docker data and runtime artifacts
+/data/
+/data/*/
+/data/**/
+
+# Backup folders
+/backups/
+/backups/*/
+
+# Environment files with secrets
+/environments/*.env
+
+# Local logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+
+# Docker compose override files if local-only
+compose/*.local.yml
