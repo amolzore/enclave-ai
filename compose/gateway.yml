@@ -24,7 +24,7 @@ services:
           cpus: "0.1"
           memory: 256M
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8181 || exit 1"]
+      test: ["CMD-SHELL", "(wget -q --spider http://127.0.0.1:81 2>/dev/null) || (curl -fsS http://127.0.0.1:81 >/dev/null 2>&1) || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
