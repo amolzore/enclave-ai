@@ -1,6 +1,7 @@
 networks:
   proxy-tier:
-    external: true
+    name: proxy-tier
+    driver: bridge
 
 services:
   redmine-db:
