@@ -3,22 +3,39 @@ networks:
     name: proxy-tier
     driver: bridge
 
-volumes:
-  proxy-data:        # Docker-managed high-speed named volume
-  proxy-certs:       # Docker-managed high-speed named volume
-
 services:
   reverse-proxy:
     image: jc21/nginx-proxy-manager:latest
     container_name: proxy-manager
-    restart: always
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    cpus: 0.2
+    mem_limit: 512m
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8181 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     ports:
       - '80:80'
       - '443:443'
       - '8181:81'
     volumes:
-      - proxy-data:/data              # Swapped out relative paths to bypass Windows NTFS locks
-      - proxy-certs:/etc/letsencrypt   # Swapped out relative paths to bypass Windows NTFS locks
+      - ../data/proxy/data:/data
+      - ../data/proxy/certs:/etc/letsencrypt
     env_file:
       - ../environments/gateway.env
     networks:

@@ -6,7 +6,28 @@ services:
   redmine-db:
     image: postgres:15
     container_name: redmine-db
-    restart: always
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    cpus: 0.2
+    mem_limit: 384m
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 384M
+        reservations:
+          cpus: "0.1"
+          memory: 192M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     env_file:
       - ../environments/redmine.env
     volumes:
@@ -17,7 +38,28 @@ services:
   redmine:
     image: redmine:latest
     container_name: redmine-app
-    restart: always
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    cpus: 0.2
+    mem_limit: 512m
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:3000 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     env_file:
       - ../environments/redmine.env
     volumes:

@@ -6,7 +6,22 @@ services:
   bookstack-db:
     image: lscr.io/linuxserver/mariadb:latest
     container_name: bookstack-db
-    restart: always
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    cpus: 0.2
+    mem_limit: 384m
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 384M
+        reservations:
+          cpus: "0.1"
+          memory: 192M
     env_file:
       - ../environments/bookstack.env
     volumes:
@@ -16,14 +31,36 @@ services:
     # Health check ensures MariaDB is fully ready before BookStack attempts migrations
     healthcheck:      
       test: ["CMD", "mariadb-admin", "ping", "-h", "127.0.0.1", "--password=secret_root_pass"]
-      interval: 10s
+      interval: 15s
       timeout: 5s
       retries: 3
+      start_period: 20s
 
   bookstack:
     image: lscr.io/linuxserver/bookstack:latest
     container_name: bookstack-app
-    restart: always
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    cpus: 0.2
+    mem_limit: 512m
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:80 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     env_file:
       - ../environments/bookstack.env
     volumes:
