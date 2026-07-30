@@ -1,0 +1,25 @@
+networks:
+  proxy-tier:
+    name: proxy-tier
+    driver: bridge
+
+volumes:
+  proxy-data:        # Docker-managed high-speed named volume
+  proxy-certs:       # Docker-managed high-speed named volume
+
+services:
+  reverse-proxy:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: proxy-manager
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+      - '8181:81'
+    volumes:
+      - proxy-data:/data              # Swapped out relative paths to bypass Windows NTFS locks
+      - proxy-certs:/etc/letsencrypt   # Swapped out relative paths to bypass Windows NTFS locks
+    env_file:
+      - ../environments/gateway.env
+    networks:
+      - proxy-tier

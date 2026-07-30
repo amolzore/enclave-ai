@@ -1,0 +1,30 @@
+networks:
+  proxy-tier:
+    external: true
+
+services:
+  redmine-db:
+    image: postgres:15
+    container_name: redmine-db
+    restart: always
+    env_file:
+      - ../environments/redmine.env
+    volumes:
+      - ../data/redmine/db:/var/lib/postgresql/data
+    networks:
+      - proxy-tier
+
+  redmine:
+    image: redmine:latest
+    container_name: redmine-app
+    restart: always
+    env_file:
+      - ../environments/redmine.env
+    volumes:
+      - ../data/redmine/data:/usr/src/redmine/files
+    ports:
+      - "3030:3000"
+    depends_on:
+      - redmine-db
+    networks:
+      - proxy-tier

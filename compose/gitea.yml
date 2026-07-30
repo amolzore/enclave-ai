@@ -1,0 +1,20 @@
+networks:
+  proxy-tier:
+    external: true
+
+services:
+  gitea:
+    image: gitea/gitea:latest
+    container_name: gitea-app
+    restart: always
+    env_file:
+      - ../environments/gitea.env
+    volumes:
+      - ../data/gitea/data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3031:3000"  # Resolved host port conflict (Moved from 3000 to 3031)
+      - "2223:22"    # Resolved host port conflict (Moved from 2222 to 2223)
+    networks:
+      - proxy-tier

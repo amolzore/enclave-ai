@@ -1,0 +1,38 @@
+networks:
+  proxy-tier:
+    external: true
+
+services:
+  bookstack-db:
+    image: lscr.io/linuxserver/mariadb:latest
+    container_name: bookstack-db
+    restart: always
+    env_file:
+      - ../environments/bookstack.env
+    volumes:
+      - ../data/bookstack/db:/config
+    networks:
+      - proxy-tier
+    # Health check ensures MariaDB is fully ready before BookStack attempts migrations
+    healthcheck:      
+      test: ["CMD", "mariadb-admin", "ping", "-h", "127.0.0.1", "--password=secret_root_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  bookstack:
+    image: lscr.io/linuxserver/bookstack:latest
+    container_name: bookstack-app
+    restart: always
+    env_file:
+      - ../environments/bookstack.env
+    volumes:
+      - ../data/bookstack/uploads:/config
+    ports:
+      - "6875:80"
+    # Strict conditional dependency prevents container boot race conditions
+    depends_on:
+      bookstack-db:
+        condition: service_healthy
+    networks:
+      - proxy-tier
